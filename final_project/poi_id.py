@@ -19,6 +19,36 @@ with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 2: Remove outliers
+import matplotlib.pyplot as plt
+def median(unsorted_list):
+    list_length = len(unsorted_list)
+    sorted_list = sorted(unsorted_list)
+    if list_length % 2 == 0:
+        return sum(sorted_list[list_length/2-1:list_length/2+1])/2.0 # mean of middle two values of even list
+    else:
+        return sorted_list[list_length/2] # middle value of odd list
+
+def nan_to_zero(val):
+    return 0 if val=='NaN' else val
+
+# plt.plot(sort(nan_to_zero(data_dict[person]['to_messages']) for person in data_dict))
+# plt.show()
+
+import operator
+for feature in features_list[1:]: # inspect all but the first feature (poi) for outliers
+    print "== {0} ==".format(feature)
+    feature_column = {}
+    for person in data_dict:
+        feature_column[person] = nan_to_zero(data_dict[person][feature])
+    feature_column = sorted(feature_column.items(), key=lambda x: x[1])
+    print median(list(x[1] for x in feature_column))
+
+
+            
+
+
+
+
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
@@ -41,28 +71,34 @@ labels, features = targetFeatureSplit(data)
 # Attempt 1
 # 	Accuracy: 0.87360	Precision: 0.57602	Recall: 0.19700	F1: 0.29359	F2: 0.22685
 #	Total predictions: 15000	True positives:  394	False positives:  290	False negatives: 1606	True negatives: 12710
-# from sklearn import neighbors
-# clf = neighbors.KNeighborsClassifier(5)
+from sklearn import neighbors
+clf1 = neighbors.KNeighborsClassifier(5)
 
 # Attempt 2
 #	Accuracy: 0.86960	Precision: 0.54089	Recall: 0.14550	F1: 0.22931	F2: 0.17041
 #	Total predictions: 15000	True positives:  291	False positives:  247	False negatives: 1709	True negatives: 12753
 from sklearn import neighbors
-clf = neighbors.KNeighborsClassifier(4)
+clf2 = neighbors.KNeighborsClassifier(4)
 
 # Attempt 3
 # Precision or recall may be undefined due to a lack of true positive predicitons.
 # from sklearn import neighbors
-# clf = neighbors.KNeighborsClassifier(6)
+clf3 = neighbors.KNeighborsClassifier(6)
 
 # Attempt 4
 # Precision or recall may be undefined due to a lack of true positive predicitons.
-# from sklearn import svm
-# clf = svm.SVC()
+from sklearn import svm
+clf4 = svm.SVC()
 
 # Attempt 5
 from sklearn import svm
-clf = svm.SVC(kernel='rbf')
+clf5 = svm.SVC(kernel='rbf', C=0.1)
+
+# Attempt 6
+
+
+# Pick which attempt to use
+clf=clf5
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
