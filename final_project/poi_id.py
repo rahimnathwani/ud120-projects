@@ -19,35 +19,33 @@ with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 2: Remove outliers
-import matplotlib.pyplot as plt
-def median(unsorted_list):
-    list_length = len(unsorted_list)
-    sorted_list = sorted(unsorted_list)
-    if list_length % 2 == 0:
-        return sum(sorted_list[list_length/2-1:list_length/2+1])/2.0 # mean of middle two values of even list
-    else:
-        return sorted_list[list_length/2] # middle value of odd list
+obvious_outlier_keys = ['TOTAL', # Spreadsheet quirk
+                        'THE TRAVEL AGENCY IN THE PARK', # Doesn't sound like a person's name 
+                       ]
+[data_dict.pop(key) for key in obvious_outlier_keys]
 
-def nan_to_zero(val):
-    return 0 if val=='NaN' else val
-
-# plt.plot(sort(nan_to_zero(data_dict[person]['to_messages']) for person in data_dict))
+import numpy as np
+features_to_check = ['salary', 'bonus'] # check most obvious features for outliers
+data_to_check = featureFormat(data_dict, features_to_check, remove_all_zeroes=False)
+# Plot salary vs. bonus
+from matplotlib import pyplot as plt
+for point in data_to_check:
+    salary = point[0]
+    bonus = point[1]
+    plt.scatter( salary, bonus )
+plt.xlabel("salary")
+plt.ylabel("bonus")
+# Commenting out the plot to prevent the program stalling if run unattended
 # plt.show()
 
-import operator
-for feature in features_list[1:]: # inspect all but the first feature (poi) for outliers
-    print "== {0} ==".format(feature)
-    feature_column = {}
-    for person in data_dict:
-        feature_column[person] = nan_to_zero(data_dict[person][feature])
-    feature_column = sorted(feature_column.items(), key=lambda x: x[1])
-    print median(list(x[1] for x in feature_column))
+# The plot showed some points with very high salaries (>1MM) and/or bonuses (>6MM).  Let's see who they are.
+def text_to_num(txt):
+    return 0 if txt == 'NaN' else int(txt)
+additional_outlier_keys = [i for i in data_dict if text_to_num(data_dict[i]['salary']) > 1000000 or text_to_num(data_dict[i]['bonus']) > 6000000]
+# print additional_outlier_keys
 
-
-            
-
-
-
+# Let's remove those folks
+[data_dict.pop(key) for key in ['LAVORATO JOHN J', 'LAY KENNETH L', 'SKILLING JEFFREY K', 'FREVERT MARK A']]
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
@@ -65,28 +63,21 @@ labels, features = targetFeatureSplit(data)
 
 # Provided to give you a starting point. Try a variety of classifiers.
 # Attempt 0
-# from sklearn.naive_bayes import GaussianNB
-# clf = GaussianNB()
+from sklearn.naive_bayes import GaussianNB
+clf0 = GaussianNB()
 
 # Attempt 1
-# 	Accuracy: 0.87360	Precision: 0.57602	Recall: 0.19700	F1: 0.29359	F2: 0.22685
-#	Total predictions: 15000	True positives:  394	False positives:  290	False negatives: 1606	True negatives: 12710
 from sklearn import neighbors
 clf1 = neighbors.KNeighborsClassifier(5)
 
 # Attempt 2
-#	Accuracy: 0.86960	Precision: 0.54089	Recall: 0.14550	F1: 0.22931	F2: 0.17041
-#	Total predictions: 15000	True positives:  291	False positives:  247	False negatives: 1709	True negatives: 12753
 from sklearn import neighbors
 clf2 = neighbors.KNeighborsClassifier(4)
 
 # Attempt 3
-# Precision or recall may be undefined due to a lack of true positive predicitons.
-# from sklearn import neighbors
 clf3 = neighbors.KNeighborsClassifier(6)
 
 # Attempt 4
-# Precision or recall may be undefined due to a lack of true positive predicitons.
 from sklearn import svm
 clf4 = svm.SVC()
 
@@ -95,10 +86,34 @@ from sklearn import svm
 clf5 = svm.SVC(kernel='rbf', C=0.1)
 
 # Attempt 6
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.decomposition import PCA
+estimators = [('pca', PCA()), ('svm', SVC(kernel='rbf'))]
+clf6 = Pipeline(estimators)
 
+# Attempt 7
+from sklearn.pipeline import Pipeline
+from sklearn import neighbors
+from sklearn.decomposition import PCA
+estimators = [('pca', PCA()), ('kneighbours', neighbors.KNeighborsClassifier(3))]
+clf7 = Pipeline(estimators)
+
+# Attempt 8
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.decomposition import PCA
+from sklearn.grid_search import GridSearchCV
+parameters = {'pca__n_components': [5, ], 'svm__kernel':['rbf', ], 'svm__C':[0.1, 1, 10], 'svm__gamma':[10**i for i in range(-2, 3)]}
+estimators = [('pca', PCA()), ('svm', SVC(kernel='rbf'))]
+clf8 = GridSearchCV(Pipeline(estimators), parameters, verbose=5, n_jobs=5)
 
 # Pick which attempt to use
-clf=clf5
+clf=clf8
+
+params = clf.get_params()
+for p in params:
+    print '{0}: {1}'.format(p, params[p])
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
