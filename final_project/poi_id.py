@@ -119,7 +119,7 @@ from sklearn import preprocessing
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
 scaler = preprocessing.MinMaxScaler()
-parameters = {'pca__n_components': range(3,9), 'svm__kernel':['rbf', ], 'svm__C':[0.1, 1, 10], 'svm__gamma':[10**i for i in range(-3, 4)]}
+parameters = {'pca__n_components': range(3,12), 'svm__kernel':['rbf', ], 'svm__C':[0.01, 0.1, 1, 10, 100], 'svm__gamma':[10**i for i in range(-5, 6)]}
 estimators = [('scaler', scaler), ('pca', PCA(n_components=5)), ('svm', SVC(kernel='rbf'))]
 cv = StratifiedShuffleSplit(
     labels,
