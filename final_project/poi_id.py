@@ -17,13 +17,14 @@ features_list = ['poi'] + financial_features + email_features
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
+print "Original data set has {0} items".format(len(data_dict))
 
 ### Task 2: Remove outliers
 obvious_outlier_keys = ['TOTAL', # Spreadsheet quirk
                         'THE TRAVEL AGENCY IN THE PARK', # Doesn't sound like a person's name 
                        ]
 [data_dict.pop(key) for key in obvious_outlier_keys]
-
+print "Removing {0} obvious outliers".format(len(obvious_outlier_keys))
 import numpy as np
 features_to_check = ['salary', 'bonus'] # check most obvious features for outliers
 data_to_check = featureFormat(data_dict, features_to_check, remove_all_zeroes=False)
@@ -45,7 +46,9 @@ additional_outlier_keys = [i for i in data_dict if text_to_num(data_dict[i]['sal
 # print additional_outlier_keys
 
 # Let's remove those folks
-[data_dict.pop(key) for key in ['LAVORATO JOHN J', 'LAY KENNETH L', 'SKILLING JEFFREY K', 'FREVERT MARK A']]
+big_folks = ['LAVORATO JOHN J', 'LAY KENNETH L', 'SKILLING JEFFREY K', 'FREVERT MARK A']
+[data_dict.pop(key) for key in big_folks]
+print "Removing {0} folks with very high salaries/bonuses".format(len(big_folks))
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
@@ -108,8 +111,27 @@ parameters = {'pca__n_components': [5, ], 'svm__kernel':['rbf', ], 'svm__C':[0.1
 estimators = [('pca', PCA()), ('svm', SVC(kernel='rbf'))]
 clf8 = GridSearchCV(Pipeline(estimators), parameters, verbose=5, n_jobs=5)
 
+# Attempt 9
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.decomposition import PCA
+from sklearn import preprocessing
+from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import StratifiedShuffleSplit
+scaler = preprocessing.MinMaxScaler()
+parameters = {'pca__n_components': [5, ], 'svm__kernel':['rbf', ], 'svm__C':[0.1, 1, 10], 'svm__gamma':[10**i for i in range(-3, 4)]}
+estimators = [('scaler', scaler), ('pca', PCA(n_components=5)), ('svm', SVC(kernel='rbf'))]
+cv = StratifiedShuffleSplit(
+    labels,
+    n_iter=10,
+    random_state=42)
+gs = GridSearchCV(Pipeline(estimators), parameters, cv=cv, verbose=5, scoring='f1', n_jobs=5)
+gs.fit(features, labels)
+clf9 = gs.best_estimator_
+
+
 # Pick which attempt to use
-clf=clf8
+clf=clf9
 
 params = clf.get_params()
 for p in params:
