@@ -102,6 +102,29 @@ from sklearn.decomposition import PCA
 estimators = [('pca', PCA()), ('kneighbours', neighbors.KNeighborsClassifier(3))]
 clf7 = Pipeline(estimators)
 
+# Make a custom scorer
+from sklearn.metrics import make_scorer
+def my_custom_score_function(predictions, labels_test):
+    false_positives, true_positives, false_negatives, true_negatives = 0.0, 0.0, 0.0, 0.0
+    for prediction, truth in zip(predictions, labels_test):
+        if prediction == 0 and truth == 0:
+            true_negatives += 1
+        elif prediction == 0 and truth == 1:
+            false_negatives += 1
+        elif prediction == 1 and truth == 0:
+            false_positives += 1
+        elif prediction == 1 and truth == 1:
+            true_positives += 1
+    try:
+        precision = 1.0*true_positives/(true_positives+false_positives)
+        recall = 1.0*true_positives/(true_positives+false_negatives)
+    except:
+        return 0.0
+    return min(precision, recall)
+
+my_custom_scorer = make_scorer(my_custom_score_function, greater_is_better=True)
+
+
 # Attempt 8
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
@@ -144,13 +167,22 @@ estimators = [('scaler', scaler), ('svm', SVC(kernel='rbf'))]
 cv = StratifiedShuffleSplit(
     labels,
     n_iter=10,
+    test_size=0.3,
     random_state=42)
-gs = GridSearchCV(Pipeline(estimators), parameters, cv=cv, verbose=5, scoring='f1', n_jobs=5)
+gs = GridSearchCV(Pipeline(estimators),
+                  parameters,
+                  cv=cv,
+                  verbose=5,
+                  scoring=my_custom_scorer,
+                  n_jobs=5)
 gs.fit(features, labels)
 clf10 = gs.best_estimator_
 
 # Pick which attempt to use
 clf=clf10
+
+print len(features)
+print len(labels)
 
 params = clf.get_params()
 for p in params:
