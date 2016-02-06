@@ -178,7 +178,8 @@ gs = GridSearchCV(Pipeline(estimators),
 gs.fit(features, labels)
 clf10 = gs.best_estimator_
 """
-# Attempt 11 (same as #10, but with PCA)
+
+"""# Attempt 11 (same as #10, but with PCA)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 from sklearn.decomposition import PCA
@@ -202,10 +203,37 @@ gs = GridSearchCV(Pipeline(estimators),
                   n_jobs=-1)
 gs.fit(features, labels)
 clf11 = gs.best_estimator_
+"""
+
+# Attempt 12 (same as #11, but with SelectKBest, and smaller range for pca__n_components)
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.decomposition import PCA
+from sklearn import preprocessing
+from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.feature_selection import SelectKBest
+scaler = preprocessing.MinMaxScaler()
+parameters = {'selectkbest__k': range(11,16), 'pca__n_components': range(6,11), 'svm__kernel':['rbf', 'poly'], 'svm__C':[(10**i) for i in range(-4, 5)], 'svm__gamma':[(10**i) for i in range(-4, 5)]}
+estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('pca', PCA()), ('svm', SVC(kernel='rbf'))]
+cv = StratifiedShuffleSplit(
+    labels,
+    n_iter=10,
+    test_size=0.3,
+    random_state=42)
+gs = GridSearchCV(Pipeline(estimators),
+                  parameters,
+                  cv=cv,
+                  verbose=5,
+                  scoring=my_custom_scorer,
+                  n_jobs=-1)
+gs.fit(features, labels)
+clf12 = gs.best_estimator_
+
 
 
 # Pick which attempt to use
-clf=clf11
+clf=clf12
 
 print len(features)
 print len(labels)
