@@ -214,7 +214,7 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.feature_selection import SelectKBest
 scaler = preprocessing.MinMaxScaler()
-parameters = {'selectkbest__k': range(11,16), 'pca__n_components': range(6,11), 'svm__kernel':['rbf', 'poly'], 'svm__C':[(10**i) for i in range(-4, 5)], 'svm__gamma':[(10**i) for i in range(-4, 5)]}
+parameters = {'selectkbest__k': range(11,17), 'pca__n_components': range(6,11), 'svm__kernel':['rbf', 'poly'], 'svm__C':[(3**i) for i in range(-10, 11)], 'svm__gamma':[(3**i) for i in range(-10, 11)]}
 estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('pca', PCA()), ('svm', SVC(kernel='rbf'))]
 cv = StratifiedShuffleSplit(
     labels,
