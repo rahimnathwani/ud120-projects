@@ -46,7 +46,8 @@ additional_outlier_keys = [i for i in data_dict if text_to_num(data_dict[i]['sal
 # print additional_outlier_keys
 
 # Let's remove those folks
-big_folks = ['LAVORATO JOHN J', 'LAY KENNETH L', 'SKILLING JEFFREY K', 'FREVERT MARK A']
+big_folks = []
+# big_folks = ['LAVORATO JOHN J', 'LAY KENNETH L', 'SKILLING JEFFREY K', 'FREVERT MARK A']
 [data_dict.pop(key) for key in big_folks]
 print "Removing {0} folks with very high salaries/bonuses".format(len(big_folks))
 
@@ -154,7 +155,7 @@ gs = GridSearchCV(Pipeline(estimators), parameters, cv=cv, verbose=5, scoring='f
 gs.fit(features, labels)
 clf9 = gs.best_estimator_
 """
-"""
+
 # Attempt 10 (without PCA)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
@@ -177,7 +178,7 @@ gs = GridSearchCV(Pipeline(estimators),
                   n_jobs=5)
 gs.fit(features, labels)
 clf10 = gs.best_estimator_
-"""
+
 
 """# Attempt 11 (same as #10, but with PCA)
 from sklearn.pipeline import Pipeline
@@ -204,7 +205,7 @@ gs = GridSearchCV(Pipeline(estimators),
 gs.fit(features, labels)
 clf11 = gs.best_estimator_
 """
-
+"""
 # Attempt 12 (same as #11, but with SelectKBest, and smaller range for pca__n_components)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
@@ -229,11 +230,11 @@ gs = GridSearchCV(Pipeline(estimators),
                   n_jobs=-1)
 gs.fit(features, labels)
 clf12 = gs.best_estimator_
-
+"""
 
 
 # Pick which attempt to use
-clf=clf12
+clf=clf10
 
 print len(features)
 print len(labels)
