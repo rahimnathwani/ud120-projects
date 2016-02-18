@@ -156,6 +156,7 @@ gs.fit(features, labels)
 clf9 = gs.best_estimator_
 """
 
+"""
 # Attempt 10 (without PCA)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
@@ -178,9 +179,10 @@ gs = GridSearchCV(Pipeline(estimators),
                   n_jobs=5)
 gs.fit(features, labels)
 clf10 = gs.best_estimator_
+"""
 
-
-"""# Attempt 11 (same as #10, but with PCA)
+"""
+# Attempt 11 (same as #10, but with PCA)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 from sklearn.decomposition import PCA
@@ -205,7 +207,7 @@ gs = GridSearchCV(Pipeline(estimators),
 gs.fit(features, labels)
 clf11 = gs.best_estimator_
 """
-"""
+
 # Attempt 12 (same as #11, but with SelectKBest, and smaller range for pca__n_components)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
@@ -230,11 +232,11 @@ gs = GridSearchCV(Pipeline(estimators),
                   n_jobs=-1)
 gs.fit(features, labels)
 clf12 = gs.best_estimator_
-"""
+
 
 
 # Pick which attempt to use
-clf=clf10
+clf=clf12
 
 print len(features)
 print len(labels)
