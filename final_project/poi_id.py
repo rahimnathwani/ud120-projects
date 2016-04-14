@@ -235,7 +235,8 @@ gs.fit(features, labels)
 clf12 = gs.best_estimator_
 """
 
-# Attempt 13 (same as #11, but with SelectKBest, and smaller range for pca__n_components)
+"""
+# Attempt 13 (Decision tree)
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
@@ -269,11 +270,43 @@ gs = GridSearchCV(Pipeline(estimators),
                   n_jobs=-1)
 gs.fit(features, labels)
 clf13 = gs.best_estimator_
+"""
 
+
+# Attempt 14 (same as #13, but with no PCA, and different parameters for DecisionTreeClassifier, and different parameters for StratifiedShuffleSplit)
+from sklearn.pipeline import Pipeline
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import preprocessing
+from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.feature_selection import SelectKBest
+scaler = preprocessing.MinMaxScaler()
+parameters = {'selectkbest__k': range(10, 16),
+              'decisiontree__criterion': ['gini', 'entropy'],
+              'decisiontree__splitter': ['best', 'random'],
+              'decisiontree__max_depth': [4, 5, 6, 7, 8, None],
+              'decisiontree__min_samples_split': [2,3],
+              'decisiontree__presort': [True],
+              }
+# estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('pca', PCA()), ('svm', SVC(kernel='rbf'))]
+estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('decisiontree', DecisionTreeClassifier())]
+cv = StratifiedShuffleSplit(
+    labels,
+    n_iter=100,
+    test_size=0.1,
+    random_state=42)
+gs = GridSearchCV(Pipeline(estimators),
+                  parameters,
+                  cv=cv,
+                  verbose=5,
+                  scoring=my_custom_scorer,
+                  n_jobs=-1)
+gs.fit(features, labels)
+clf14 = gs.best_estimator_
 
 
 # Pick which attempt to use
-clf=clf13
+clf=clf14
 
 print len(features)
 print len(labels)
