@@ -59,6 +59,17 @@ my_dataset = data_dict
 data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
+### SelectKBest
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+kbest_output = SelectKBest(f_classif).fit(features, labels)
+feature_scores = zip(features_list[1:], kbest_output.scores_)
+feature_scores.sort(key=lambda x: x[1])
+for item in feature_scores:
+    print item
+import time
+time.sleep(10)
+
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
 ### Note that if you want to do PCA or other multi-stage operations,
@@ -189,7 +200,7 @@ from sklearn.decomposition import PCA
 from sklearn import preprocessing
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
-from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import 	SelectKBest
 scaler = preprocessing.MinMaxScaler()
 parameters = {'pca__n_components': range(10,20), 'svm__kernel':['rbf', ], 'svm__C':[100*(1.05**i) for i in range(-10, 11)], 'svm__gamma':[1.05**i for i in range(-10, 11)]}
 estimators = [('scaler', scaler), ('pca', PCA()), ('svm', SVC(kernel='rbf'))]
@@ -281,19 +292,18 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.feature_selection import SelectKBest
 scaler = preprocessing.MinMaxScaler()
-parameters = {'selectkbest__k': range(12, 17),
+parameters = {'selectkbest__k': range(8, 15),
               'decisiontree__criterion': ['gini', 'entropy'],
               'decisiontree__splitter': ['best', 'random'],
-              'decisiontree__max_depth': [7, 8, 9, 10, 11, 12, None],
-              'decisiontree__min_samples_split': [4, 5, 6, 7, 8, 9, 10],
+              'decisiontree__max_depth': [6, 7, 8, 9, 10, 11, 12, None],
+              'decisiontree__min_samples_split': [2, 3, 4, 5],
               'decisiontree__presort': [True],
               }
-# estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('pca', PCA()), ('svm', SVC(kernel='rbf'))]
 estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('decisiontree', DecisionTreeClassifier())]
 cv = StratifiedShuffleSplit(
     labels,
-    n_iter=200,
-    test_size=0.1,
+    n_iter=1000,
+    test_size=0.15,
     random_state=42)
 gs = GridSearchCV(Pipeline(estimators),
                   parameters,
