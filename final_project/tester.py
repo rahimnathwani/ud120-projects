@@ -111,5 +111,8 @@ if __name__ == '__main__':
     from sklearn import tree
     from sklearn.externals.six import StringIO
     with open("iris.dot", 'w') as f:
-        f = tree.export_graphviz(clf.named_steps['decisiontree'], out_file=f)
+        f = tree.export_graphviz(clf.named_steps['decisiontree'], out_file=f,
+                         feature_names=feature_list,  
+                         filled=True, rounded=True,  
+                         special_characters=True) 
     print "dot -Tpdf iris.dot -o iris.pdf"
