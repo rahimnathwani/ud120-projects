@@ -107,3 +107,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+    clf, dataset, feature_list = load_classifier_and_data()
+    from sklearn import tree
+    from sklearn.externals.six import StringIO
+    with open("iris.dot", 'w') as f:
+        f = tree.export_graphviz(clf.named_steps['decisiontree'], out_file=f)
+    print "dot -Tpdf iris.dot -o iris.pdf"

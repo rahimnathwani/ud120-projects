@@ -30,6 +30,8 @@ features_to_check = ['salary', 'bonus'] # check most obvious features for outlie
 data_to_check = featureFormat(data_dict, features_to_check, remove_all_zeroes=False)
 # Plot salary vs. bonus
 from matplotlib import pyplot as plt
+from matplotlib import use as mpluse
+mpluse('Agg')
 for point in data_to_check:
     salary = point[0]
     bonus = point[1]
@@ -37,7 +39,8 @@ for point in data_to_check:
 plt.xlabel("salary")
 plt.ylabel("bonus")
 # Commenting out the plot to prevent the program stalling if run unattended
-# plt.show()
+plt.show()
+plt.savefig('myfig')
 
 # The plot showed some points with very high salaries (>1MM) and/or bonuses (>6MM).  Let's see who they are.
 def text_to_num(txt):
@@ -53,7 +56,22 @@ print "Removing {0} folks with very high salaries/bonuses".format(len(big_folks)
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
+def handle_nan(x):
+    return 0 if x == 'NaN' else x
+
+def divide_nicely(a, b):
+    if a!=0 and b!=0:
+        return a/b
+    if a>0 and b==0:
+        return 100
+    return 0
+
 my_dataset = data_dict
+for person in my_dataset:
+    bonus = handle_nan(my_dataset[person]['bonus'])
+    salary = handle_nan(my_dataset[person]['salary'])
+    my_dataset[person]['bonus_percent'] = divide_nicely(bonus, salary)
+features_list.append('bonus_percent')
 
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys = True)
@@ -303,7 +321,7 @@ estimators = [('selectkbest', SelectKBest()), ('scaler', scaler), ('decisiontree
 cv = StratifiedShuffleSplit(
     labels,
     n_iter=1000,
-    test_size=0.15,
+    test_size=0.1,
     random_state=42)
 gs = GridSearchCV(Pipeline(estimators),
                   parameters,
